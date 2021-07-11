@@ -90,14 +90,14 @@ const createSpectatorFile = async (gameId, observerKey) => {
   `;
   
   try {
-    return fs.promises.writeFile(`./public/riftmaker-spectate-${gameId}.bat`, content, () => {});
+    return fs.promises.writeFile(`./temp/riftmaker-spectate-${gameId}.bat`, content, () => {});
   } catch (error) {
     console.log(error);
   }
 };
 
 const deleteSpectatorFile = async (gameId) => {
-  return fs.promises.unlink(`./public/riftmaker-spectate-${gameId}.bat`, () => {});
+  return fs.promises.unlink(`./temp/riftmaker-spectate-${gameId}.bat`, () => {});
 };
 
 module.exports = {

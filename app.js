@@ -61,7 +61,7 @@ app.use('/api/spectate/:gameId/:observerKey', async (req, res, next) => {
   try {
     await createSpectatorFile(req.params.gameId, observerKey);
     res.setHeader('Content-disposition', `attachment; filename=riftmaker-spectate-${req.params.gameId}.bat`)
-    res.status(200).sendFile(`riftmaker-spectate-${req.params.gameId}.bat`, { root: path.join(__dirname, './public') }, async () => {
+    res.status(200).sendFile(`riftmaker-spectate-${req.params.gameId}.bat`, { root: path.join(__dirname, './temp') }, async () => {
       await deleteSpectatorFile(req.params.gameId);
     });
   } catch (error) {
