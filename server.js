@@ -53,6 +53,7 @@ server.listen(port);
 const wss = new WebSocket.Server({ server });
 wss.on('connection', (ws) => {
   console.log('WSS Connected');
+  ws.send(JSON.stringify({ status: 'connected', timestamp: new Date().getTime() }));
 });
 
 setInterval(async () => {
