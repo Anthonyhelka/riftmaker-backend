@@ -93,7 +93,7 @@ setInterval(async () => {
   } catch (error) {
     console.log(error)
   }
-}, 120000);
+}, 60000);
 
 const connectDB = async () => {
   try {
