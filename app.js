@@ -23,9 +23,9 @@ app.use('/api/ping', async (req, res, next) => {
 app.use('/api/summoner/:name', async (req, res, next) => {
   console.log(`/api/summoner/${req.params.name}`);
   try {
-    const summonerUrl = `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${req.params.name}?api_key=${process.env.RIOT_DEV_KEY}`;
+    const summonerUrl = `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${req.params.name}?api_key=${process.env.RIOT_API_KEY}`;
     const summoner = await axios.get(summonerUrl);
-    const rankUrl = `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.data.id}?api_key=${process.env.RIOT_DEV_KEY}`;
+    const rankUrl = `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.data.id}?api_key=${process.env.RIOT_API_KEY}`;
     const response = await axios.get(rankUrl);
     res.status(200).send(response.data[0]);
   } catch (error) {
@@ -47,7 +47,7 @@ app.use('/api/summoners', async (req, res, next) => {
 app.use('/api/activeGame/:id', async (req, res, next) => {
   console.log(`/api/activeGame/${req.params.id}`);
   try {
-    const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${req.params.id}?api_key=${process.env.RIOT_DEV_KEY}`;
+    const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${req.params.id}?api_key=${process.env.RIOT_API_KEY}`;
     const response = await axios.get(url);
     res.status(200).send({ activeGame: true, data: response.data });
   } catch (error) {

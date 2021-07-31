@@ -65,23 +65,23 @@ setInterval(async () => {
       }
     });
     // Get Summoners
-    const firstPageUrl = `https://na1.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/CHALLENGER/I?page=1&api_key=${process.env.RIOT_DEV_KEY}`;
+    const firstPageUrl = `https://na1.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/CHALLENGER/I?page=1&api_key=${process.env.RIOT_API_KEY}`;
     const firstResponse = await axios.get(firstPageUrl);
     let summoners = firstResponse.data;
-    const secondPageUrl = `https://na1.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/CHALLENGER/I?page=2&api_key=${process.env.RIOT_DEV_KEY}`;
+    const secondPageUrl = `https://na1.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/CHALLENGER/I?page=2&api_key=${process.env.RIOT_API_KEY}`;
     const secondResponse = await axios.get(secondPageUrl);
     summoners = summoners.concat(secondResponse.data);
+    console.log(summoners.length)
     await deleteSummoners();
     // Get ActiveGames & Store Summoners in DB
-    for (let i = 0; i < 75; i++) {
+    for (const summoner of summoners) {
       try {
-        const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${summoners[i].summonerId}?api_key=${process.env.RIOT_DEV_KEY}`;
+        const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${summoner.summonerId}?api_key=${process.env.RIOT_API_KEY}`;
         const response = await axios.get(url);
-        const result = await createSummoner(summoners[i], { status: true, data: response.data });
-        console.log('CREATED:', result.summonerName, 'true');
+        const result = await createSummoner(summoner, { status: true, data: response.data });
+        console.log('IN GAME:', result.summonerName);
       } catch (error) {
-        const result = await createSummoner(summoners[i], { status: false, data: null });
-        console.log('CREATED:', result.summonerName, 'false');
+        await createSummoner(summoner, { status: false, data: null });
       }
     }
     wss.clients.forEach((client) => {
@@ -93,7 +93,7 @@ setInterval(async () => {
   } catch (error) {
     console.log(error)
   }
-}, 60000);
+}, 180000);
 
 const connectDB = async () => {
   try {
