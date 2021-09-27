@@ -72,16 +72,26 @@ setInterval(async () => {
     const secondResponse = await axios.get(secondPageUrl);
     summoners = summoners.concat(secondResponse.data);
     console.log(summoners.length)
-    await deleteSummoners();
     // Get ActiveGames & Store Summoners in DB
-    for (const summoner of summoners) {
+    for (const item of summoners) {
       try {
-        const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${summoner.summonerId}?api_key=${process.env.RIOT_API_KEY}`;
+        const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${item.summonerId}?api_key=${process.env.RIOT_API_KEY}`;
         const response = await axios.get(url);
-        const result = await createSummoner(summoner, { status: true, data: response.data });
-        console.log('IN GAME:', result.summonerName);
+        const summoner = await findSummoner(item.summonerId);
+        if (summoner.length > 0) {
+          const result = await updateSummoner(item, { status: false, data: response.data });
+          console.log('UPDATED IN GAME:', result.summonerName);
+        } else {
+          const result = await createSummoner(item, { status: false, data: response.data });
+          console.log('CREATED IN GAME:', result.summonerName);
+        }
       } catch (error) {
-        await createSummoner(summoner, { status: false, data: null });
+        const summoner = await findSummoner(item.summonerId);
+        if (summoner.length > 0) {
+          await updateSummoner(item, { status: false, data: null });
+        } else {
+          await createSummoner(item, { status: false, data: null });
+        }      
       }
     }
     wss.clients.forEach((client) => {
