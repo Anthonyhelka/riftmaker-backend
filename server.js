@@ -61,7 +61,7 @@ setInterval(async () => {
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         console.log('UPDATING WS MESSAGE SENT');
-        client.send(JSON.stringify({ status: 'updating', timestamp: new Date().getTime() }));
+        client.send(JSON.stringify({ status: 'startUpdate', timestamp: new Date().getTime() }));
       }
     });
     // Get Summoners
@@ -78,26 +78,34 @@ setInterval(async () => {
         const url = `https://na1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${item.summonerId}?api_key=${process.env.RIOT_API_KEY}`;
         const response = await axios.get(url);
         const summoner = await findSummoner(item.summonerId);
+        let result;
         if (summoner.length > 0) {
-          const result = await updateSummoner(item, { status: false, data: response.data });
-          console.log('UPDATED IN GAME:', result.summonerName);
+          result = await updateSummoner(item, { status: true, data: response.data });
         } else {
-          const result = await createSummoner(item, { status: false, data: response.data });
-          console.log('CREATED IN GAME:', result.summonerName);
+          await createSummoner(item, { status: true, data: response.data });
         }
+        console.log('IN GAME:', result.summonerName);
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            console.log('SUMMONER UPDATE WS MESSAGE SENT');
+            client.send(JSON.stringify({ status: 'summonerUpdate', data: result, timestamp: new Date().getTime() }));
+          }
+        });
       } catch (error) {
         const summoner = await findSummoner(item.summonerId);
-        if (summoner.length > 0) {
-          await updateSummoner(item, { status: false, data: null });
-        } else {
-          await createSummoner(item, { status: false, data: null });
-        }      
+        const result = summoner.length > 0 ? await updateSummoner(item, { status: false, data: null }) : await createSummoner(item, { status: false, data: null });
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            console.log('SUMMONER UPDATE WS MESSAGE SENT');
+            client.send(JSON.stringify({ status: 'summonerUpdate', data: result, timestamp: new Date().getTime() }));
+          }
+        });      
       }
     }
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         console.log('UPDATED WS MESSAGE SENT');
-        client.send(JSON.stringify({ status: 'updated', timestamp: new Date().getTime() }));
+        client.send(JSON.stringify({ status: 'allUpdated', timestamp: new Date().getTime() }));
       }
     });
   } catch (error) {
