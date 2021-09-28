@@ -109,9 +109,22 @@ setInterval(async () => {
       }
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}, 180000);
+}, 120000);
+
+setInterval(async () => {
+  try {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        console.log('PING WS MESSAGE SENT');
+        client.send(JSON.stringify({ status: 'ping', timestamp: new Date().getTime() }));
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}, 60000);
 
 const connectDB = async () => {
   try {
